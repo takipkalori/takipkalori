@@ -272,6 +272,10 @@ body{padding-top:72px}
 .authbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border-radius:16px;padding:12px 14px;box-shadow:0 1px 3px rgba(16,35,28,.08)}
 .authbar .sub{flex:1 1 220px}
 .authbar .row{flex:0 0 auto}
+.quote{background:var(--surface);border-radius:20px;border-left:6px solid var(--accent);padding:16px 18px;display:grid;gap:8px;box-shadow:0 1px 3px rgba(16,35,28,.08),0 10px 28px rgba(16,35,28,.05)}
+.quote .qlbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.quote .qtxt{font-family:var(--fd);font-size:19px;line-height:1.35;font-weight:600;text-wrap:pretty}
+.quote .qfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .entries .meta.cost{color:var(--accent);font-weight:600}
@@ -328,6 +332,12 @@ body[data-view="profile"] [data-view]:not([data-view~="profile"]){display:none!i
       <button class="btn" type="button" id="btnSync">Şimdi eşitle</button>
       <button class="btn ghost" type="button" id="btnOut">Çıkış yap</button>
     </div>
+  </section>
+
+  <section class="quote" id="quoteCard" data-view="today" aria-live="polite">
+    <span class="qlbl">Günün sözü</span>
+    <p class="qtxt" id="quoteTxt"></p>
+    <div class="qfoot"><span class="sub" id="quoteNo"></span><button class="btn ghost" type="button" data-quote>↻ Başka söz</button></div>
   </section>
 
   <div class="authbar" id="authBar" data-view="today" hidden>
@@ -1015,6 +1025,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   function f1(n) { return n.toLocaleString('tr-TR', { maximumFractionDigits: 1 }); }
 
   function renderMore() {
+    renderQuote();
     var t = totals(cur), d = readDay(cur), sn = $('#sideNet');
     sn.textContent = t.has ? signed(t.net) + ' kcal' : '—';
     sn.className = t.has ? (t.net >= 0 ? 'g' : 'b') : '';
@@ -1075,6 +1086,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   }
   function bindNav() {
     document.addEventListener('click', function (e) {
+      if (e.target.closest('[data-quote]')) { qOff++; renderQuote(); return; }
       var wb = e.target.closest('[data-why]');
       if (wb) {
         var fm = wb.closest('form'), on = wb.getAttribute('aria-pressed') === 'true';
@@ -1145,6 +1157,117 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
         : '<p class="cap">Bu güne düşen ek pay: +' + fmt(db.add) + ' kcal. Profilde hedef açık girersen hedefine eklenir.</p>';
     }
     $('#debtBody').innerHTML = h;
+  }
+
+  var QUOTES = [
+ "Bugün attığın her adım, yarınki “bir dilim daha” bahanesinden değerlidir.",
+ "Kalori saymak zor değil. Zor olan, simit kokusunu alıp saymaya devam etmek.",
+ "Tartı yalan söylemez ama sabah aç karnına çıkarsan daha az üzülür.",
+ "Spor yapmadığın günün de kalorisi var. Sadece fatura geceden gelir.",
+ "Bir dilim pizza seni bozmaz. “Nasılsa bozuldu” diyip bütün pizzayı bitirmek bozar.",
+ "Motivasyon gelmediyse ayakkabıyı giy. O da koşarak arkandan gelir.",
+ "Buzdolabının ışığı hep “yine mi?” der gibi yanıyor. Cevap ver: “Evet, su için.”",
+ "On dakika yürüyüş kanepeyle ilişkini bitirmez ama “karışık” yapar. İyi bir başlangıç.",
+ "Kilo vermek maraton, ama bu maratonda ikram masası da var. Seç, ama akıllı seç.",
+ "Bazen susuzluk, açlık kılığına girer. Önce bir bardak su iç, ajanı yakala.",
+ "Akşam 11’de mutfakta plan yapan genelde plansız çıkar. Planı sabah yap.",
+ "Baklava bir gün de bekler. Yürüyüşe çık, o arada soğusun.",
+ "Gizli formül yok: biraz az ye, biraz çok kıpırdan. Sıkıcı ama çalışıyor.",
+ "Mükemmel gün yok, “idare eder” gün var. İdare eden gün de seni hedefe götürür.",
+ "Bir kekin kalorisi 220, vicdan azabının kalorisi sıfır. Tadını çıkar, yarın devam.",
+ "Sabah koşusu, uyanmanın en pahalı yolu. Ama ödülü güzel.",
+ "Çay şekersizse masumdur. İki şekerse masumiyet sorgulanır.",
+ "Ekmek düşman değil. Sadece her öğüne arkadaş getiriyor.",
+ "“Pazartesi başlarım” diye bir şehir yok. Bugün başla.",
+ "Spor ayakkabıların dolapta durmak için değil, seni gezdirmek için alındı.",
+ "Vücudun araba değil ama yakıtı yine sen seçiyorsun. Süper al, kola değil.",
+ "Merdiven, asansörün sporlu kuzenidir. Selam ver, çık.",
+ "Gece dolaba giden elini diş fırçasına yönlendir. Tatlı çıkmaz ama işe yarar.",
+ "Salata yaprağı gibi ol: hafif, taze ve gerekirse biraz soslu.",
+ "“Bir tane daha” dediğin şey genelde altıncıdır.",
+ "Yapmak istemediğin 20 dakikalık egzersiz, yarın pişman olacağın 20 dakikalık bahaneden iyidir.",
+ "Hayat kısa, baklava dilimi 180 kalori. Matematik yap, mutlu ol.",
+ "Tartıya çıkmadan önce telefon şarjı kadar sabır al.",
+ "Hafta sonu yediklerin seni tanımlamaz. Pazartesi yaptıkların tanımlar.",
+ "Yarın başlayacağını söyleyen kişi dün de aynısını söylemişti. İkisini de şaşırt, bugün başla.",
+ "Protein tozu seni hemen kaslı yapmaz ama shaker’ı sallamak zaten kol egzersizi.",
+ "Su içmeyi unutuyorsan hatırlatıcı kur. Telefon seni bu kadar özlüyor, kullan.",
+ "Yeşil çay mucize değil. Ama içerken bir şey yemediğin için mucize sayılır.",
+ "Abur cubur sana borçlu değil, sen de ona. Hesaplaşıp ayrılın.",
+ "En iyi diyet, sürdürebildiğin diyettir. Baklavasızı değil, akıllı baklavalısı.",
+ "Bir ay sonra “iyi ki başlamışım” diyeceksin. Ya da “keşke dün başlasaydım”. İkincisi bedava ders.",
+ "Kalori açığı bütçe açığına benzemez: burada açık verirsen kazanırsın.",
+ "Her kilometre seni kanepeden bir kilometre uzaklaştırır. Kanepe merak etme, bekler.",
+ "Bugün hayır dediğin her atıştırmalık, yarın “sen de iyisin” diyen bir pantolondur.",
+ "Salatanın üstüne zeytinyağı koy ama sos havuz değil, yüzme.",
+ "İlham da sporcudur, bazen o da geç kalır. Sen yine de git.",
+ "Bir kare çikolata moral, bir bar çikolata anlaşmanın dışında. Küçük ama net.",
+ "Kendine iyi davran: yürü, su iç, uyu. Sonra aynaya göz kırp.",
+ "Ayran Türk mutfağının mucizesi. Hem içilir, hem kutlanır.",
+ "Plan: akşam hafif. Gerçek: kuru fasulye, pilav, cacık. İyi ki varsın kuru fasulye, yarın telafi.",
+ "Bugün yaptığın küçük şey yarın büyük bir alışkanlık olur. Küçük şeyi yap.",
+ "Spor salonunun kapısından girmek bile kazanmaktır. Gerisi bonus.",
+ "Antrenman sırasında “bitsin artık” demek normal. Bitince “iyi ki yapmışım” demek bedava.",
+ "Kilo vermek için aç kalma, akıllı ye. Aç kalan ertesi gün buzdolabına isyan eder.",
+ "Eve gelince önce üstünü değiştir, sonra buzdolabına git. Üstünü değiştiren yürüyüşe de gider.",
+ "Döner şahane ama yanındaki patates ayrı bir hikâye. Hikâyeyi sen yaz.",
+ "Düğün büfesi iradenin final sınavıdır. Önce tabağı küçük al.",
+ "Telefona bakarken yersen ne yediğini tabak bilir, bir sen bilmezsin.",
+ "Yavaş ye. Beyin “doydum” mesajını postayla alıyor, 20 dakika sürer.",
+ "Çay saati tatlı saati değildir. Tamam, bazen oluyor ama bugün değil.",
+ "Dolapta saklanan çikolata, vicdanının sesli mesajıdır.",
+ "Egzersiz süren sosyal medya süren kadar olsa şimdiye maraton koşardın.",
+ "Kimse ilk günde mükemmel yapmadı. Herkes ağır ağır başladı.",
+ "Dün kötüydü diye bugün kötü olmak zorunda değil. Takvim her gün yeni sayfa açar.",
+ "Mangalda et güzel, ekmek-pilav-ayran üçlüsü de güzel. Tabakta herkese yer ayır.",
+ "Kalori borcun varsa bugün biraz fazla yürü. Faiz yok, sadece ayakkabı aşınır.",
+ "Bu uygulama seni yargılamaz, sadece hesap yapar. Hesap da sakin.",
+ "Gün bitmeden son bir bardak su iç. Dünyanın en ucuz yatırımı.",
+ "Yağ yakmak için yürüyorsun ama kafanı da boşaltıyorsun. Çifte kazanç.",
+ "Simit 300 kalori, susamı bonus değil. Yine de ye, keyfini çıkar, sonra yürü.",
+ "Bir günde dünyayı kurtarma. Bir bardak su, bir yürüyüş, bir iyi karar yeter.",
+ "Sadece kendinle yarış. Başkalarının tabağı seni ilgilendirmez.",
+ "Bugün vazgeçmek istiyorsan önce 5 dakika dene. Çoğu zaman 5 dakika 30 dakika olur.",
+ "Spor çantanı hazır tut. Hazır çanta, yarım yapılmış antrenmandır.",
+ "Kuru yemiş sağlıklıdır ama bir avuç, bir avuçtur; paket değil.",
+ "Bir gün kötü giderse hafta bozulmaz. Bir hafta kötü giderse ay bozulmaz. Devam etmek kazandırır.",
+ "Hamburger çok sevimli ama sen daha sevimlisin. Karar senin.",
+ "Sofradan kalkarken “bitirmek zorunda değilsin” de. Tabak bitti diye mutluluk bitmez.",
+ "Kendini kısıtlamak yerine plan yap. Plan özgürlüktür, yasak kavgadır.",
+ "Pazar günü bir saat yemek hazırlığı yapan, hafta boyunca kendine teşekkür eder.",
+ "Bugün yaktığın kalori yarın fark edilmeyebilir ama bir gün pantolon fark eder.",
+ "Terin her damlası bir “iyi ki” demek. Havluyu da ödülün say.",
+ "Yürüyüşte müziği aç. Kalabalıkta dans etmeyeceksen en azından adımların dans etsin.",
+ "Meyve doğanın tatlısı. Ama kilosu ayrı hesaplanıyor, karpuzu tek başına bitirme.",
+ "Şeker krizi geldi: önce su, sonra yürüyüş, sonra karar. Karar hâlâ çikolataysa bir kare ye.",
+ "Evde egzersiz yaparken kedinin üstüne çıkması da dahildir. Evde hareket, hareket.",
+ "Gününü planlayan akşam yemeğinde sürpriz yaşamaz. Sürprizi tatlıya sakla.",
+ "Kendinle bir arkadaşınla konuşur gibi konuş. Arkadaşına “tembelsin” demezsin, “bugün olmadı” dersin.",
+ "Dengeli beslen: bir elinde salata, diğerinde ayran. Pizza için üçüncü el yok.",
+ "Spor sadece vücut için değil, ruh için. Bugün biraz hareket, biraz huzur.",
+ "Kilo vermek bir bulmaca: parçalar su, uyku, hareket ve sabır. Hepsi tamamlanınca resim çıkar.",
+ "Uyumak da diyetin parçasıdır. Uykusuz kalan beyin gece 2’de dolabı tarar.",
+ "Bugünün hedefi iyi bir gün geçirmek. Kalori hesabı bunun küçük bir parçası.",
+ "Haftada bir “ödül öğünü” yap ama ödülü hak ettiğine karar vermeden önce yürü.",
+ "Mutfakta sağlıklı şeyler hazır olsun. Ulaşması kolay olan, yenmesi de kolay olandır.",
+ "Her sağlıklı seçim küçük bir yatırım. Bileşik faizi bir gün pantolonda görürsün.",
+ "Gülmek de kalori yakar, küçük ama ücretsiz. Bu sözü okuyup gülümsedin, 1 kcal kâr.",
+ "Antrenmanı bitirince aynaya “efsane” de. Kimse duymaz ama sen duyarsın.",
+ "Hedefe giden yol dümdüz değil, ara sıra poğaça durağı var. Orada konaklamayı bırak.",
+ "Yüzde yüz değil, yüzde seksen ama her gün. Sürdürülebilirlik kraldır.",
+ "Şekere kasada dururken değil, yola çıkarken karar ver. Strateji orada kazanılır.",
+ "Dostlarla sohbette ye, sohbet bitince de bir yürüyüş. Dostlar da yürür.",
+ "Kimse sadece salatayla yaşamaz. Ama sağlıklı bir hayat salatayı da sever.",
+ "Bu uygulama sana güveniyor. Sen de kendine güven, harika bir takımsınız.",
+ "Bugün kendini ödüllendir: yürü, güneşe bak, bir bardak su iç. Pantolon sonra teşekkür eder."
+];
+  var qOff = 0;
+  function renderQuote() {
+    var pr = todayKey.split('-').map(Number);
+    var day = Math.round(Date.UTC(pr[0], pr[1] - 1, pr[2]) / 86400000);
+    var i = (((day * 37 + qOff) % QUOTES.length) + QUOTES.length) % QUOTES.length;
+    $('#quoteTxt').textContent = QUOTES[i];
+    $('#quoteNo').textContent = 'Söz ' + (i + 1) + ' / ' + QUOTES.length;
   }
 
   function renderProfileText() {
