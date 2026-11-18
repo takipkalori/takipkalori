@@ -273,6 +273,11 @@ body{padding-top:72px}
 .authbar .sub{flex:1 1 220px}
 .authbar .row{flex:0 0 auto}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.entries .meta.cost{color:var(--accent);font-weight:600}
+.tagb{margin-top:6px;min-height:34px;padding:0 12px;border-radius:999px;border:1px dashed var(--line);background:transparent;color:var(--ink-2);font-size:13px;font-weight:600;cursor:pointer}
+.tagb.on{border-style:solid;border-color:var(--accent);color:var(--accent)}
+.whylbl{font-size:13px;color:var(--ink-2);font-weight:600}
 .chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer}
 .chip:hover{border-color:var(--accent)}
 body[data-view="today"] [data-view]:not([data-view~="today"]),
@@ -380,6 +385,11 @@ body[data-view="profile"] [data-view]:not([data-view~="profile"]){display:none!i
     <div id="guideBody"></div>
   </details>
 
+  <section class="card" id="debtCard" data-view="today">
+    <header><h2>Kalori borç defteri</h2><span class="sub">Fazla 3 güne yayılır</span></header>
+    <div id="debtBody"></div>
+  </section>
+
   <section class="card" id="dayDetail" data-view="today">
     <header><h2>Günün ayrıntısı</h2><span class="sub">Seçili gün</span></header>
     <div id="dayBody"></div>
@@ -457,6 +467,11 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     ['Kahvaltılık','Domates, salatalık','1 porsiyon',30],
     ['Kahvaltılık','Yulaf ezmesi','40 g kuru',150],
     ['Kahvaltılık','Granola','40 g',180],
+    ['Kahvaltılık','Wasa (çıtır ekmek)','1 dilim',40],
+    ['Kahvaltılık','Lor peyniri','2 yemek kaşığı (50 g)',50],
+    ['Kahvaltılık','Activia probiyotik shot','1 şişe (80 ml)',36],
+    ['Kahvaltılık','Sek Quark (sade)','1 kase (140 g)',140],
+    ['Kahvaltılık','Protein tozu (24 g protein)','1 porsiyon',112],
     ['Ekmek ve hamur işi','Beyaz ekmek','1 dilim',75],
     ['Ekmek ve hamur işi','Tam buğday ekmeği','1 dilim',65],
     ['Ekmek ve hamur işi','Simit','1 adet',300],
@@ -646,14 +661,18 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   }
 
   /* ---------- Yapı ---------- */
-  function foodOptions() {
-    var cats = [];
-    FOODS.forEach(function (f) { if (cats.indexOf(f[0]) < 0) cats.push(f[0]); });
-    var h = '<option value="" selected>Yemek seç…</option>';
+  function foodOptions(q) {
+    var cats = [], toks = normUser(q || '').split(/\s+/).filter(Boolean);
+    var ok = function (f) {
+      var hay = normUser(f[0] + ' ' + f[1] + ' ' + f[2]);
+      return toks.every(function (t) { return hay.indexOf(t) >= 0; });
+    };
+    FOODS.forEach(function (f) { if (ok(f) && cats.indexOf(f[0]) < 0) cats.push(f[0]); });
+    var h = '<option value="" selected>' + (toks.length ? 'Eşleşenler' : 'Yemek seç…') + '</option>';
     cats.forEach(function (c) {
       h += '<optgroup label="' + esc(c) + '">';
       FOODS.forEach(function (f, i) {
-        if (f[0] === c) h += '<option value="' + i + '">' + esc(f[1]) + ' (' + esc(f[2]) + ') · ' + f[3] + ' kcal</option>';
+        if (f[0] === c && ok(f)) h += '<option value="' + i + '">' + esc(f[1]) + ' (' + esc(f[2]) + ') · ' + f[3] + ' kcal</option>';
       });
       h += '</optgroup>';
     });
@@ -668,8 +687,9 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
         '<header><h2>' + m.t + '</h2><span class="sub">' + m.s + '</span><span class="tot" id="mk-' + m.id + '">0 kcal</span></header>' +
         '<ul class="entries" id="en-' + m.id + '"></ul>' +
         '<form class="adder" data-meal="' + m.id + '" novalidate>' +
+          '<label class="sr" for="qs-' + m.id + '">Yemek ara</label><input id="qs-' + m.id + '" type="search" data-search placeholder="Yemek ara… (örn. wasa, lor, quark)" autocomplete="off" enterkeyhint="search">' +
           '<label class="sr" for="sel-' + m.id + '">Yemek seç</label>' +
-          '<select id="sel-' + m.id + '">' + opts + '</select>' +
+          '<select id="sel-' + m.id + '">' + opts + '</select>' + whyHtml() +
           '<div class="row" data-qtyrow>' +
             '<label for="qty-' + m.id + '">Miktar (adet / porsiyon)<input id="qty-' + m.id + '" type="number" inputmode="decimal" min="0.25" step="0.25" value="1"></label>' +
             '<button class="btn primary" type="submit">Ekle</button>' +
@@ -700,7 +720,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   }
 
   function renderHero() {
-    var t = totals(cur), tg = target();
+    var t = totals(cur), db = debtFor(cur), tg = target() > 0 ? target() + Math.round(db.add) : 0;
     $('#eqM').textContent = fmt(t.maint);
     $('#eqS').textContent = fmt(t.burned);
     $('#eqE').textContent = fmt(t.eaten);
@@ -722,7 +742,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     if (tg > 0) {
       var pct = Math.max(0, Math.min(1, t.net / tg)) * 100;
       bar.style.width = pct + '%';
-      bt.textContent = 'Hedef ' + fmt(tg) + ' kcal açığın %' + Math.round(pct) + '’i';
+      bt.textContent = (db.add > 0 ? 'Bugünkü hedef (borç dahil) ' : 'Hedef ') + fmt(tg) + ' kcal açığın %' + Math.round(pct) + '’i';
     } else { bar.style.width = '0%'; bt.textContent = ''; }
   }
 
@@ -731,7 +751,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     MEALS.forEach(function (m) {
       var list = d.meals[m.id];
       $('#en-' + m.id).innerHTML = list.length ? list.map(function (e, i) {
-        return '<li><div class="nm">' + esc(e.n) + (e.u ? '<div class="meta">' + esc(e.q) + ' × ' + esc(e.u) + '</div>' : '') + '</div>' +
+        return '<li><div class="nm">' + esc(e.n) + (e.u ? '<div class="meta">' + esc(e.q) + ' × ' + esc(e.u) + '</div>' : '') + (walkMin(e.k) >= 3 ? '<div class="meta cost">≈ ' + fmt(walkMin(e.k)) + ' dk hızlı yürüyüş</div>' : '') + '<button class="tagb' + (e.w ? ' on' : '') + '" type="button" data-tag="' + m.id + '" data-i="' + i + '">' + (e.w ? whyName(e.w) : '+ neden') + '</button>' + '</div>' +
           '<span class="k">' + fmt(e.k) + ' kcal</span>' +
           '<button class="x" type="button" data-del="meal" data-m="' + m.id + '" data-i="' + i + '" aria-label="' + esc(e.n) + ' sil">×</button></li>';
       }).join('') : '<li class="empty">Henüz bir şey eklenmedi.</li>';
@@ -770,7 +790,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   }
 
   function analyze(keys) {
-    var r = { days: [], logged: [], eaten: 0, burned: 0, net: 0, meals: {}, foods: {}, sports: {}, sportMin: 0 };
+    var r = { days: [], logged: [], eaten: 0, burned: 0, net: 0, meals: {}, foods: {}, sports: {}, sportMin: 0, why: {} };
     MEALS.forEach(function (m) { r.meals[m.id] = 0; });
     keys.forEach(function (k) {
       var t = totals(k); t.k = k; r.days.push(t);
@@ -782,6 +802,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
         d.meals[m.id].forEach(function (e) {
           var f = r.foods[e.n] || (r.foods[e.n] = { n: e.n, k: 0, c: 0 });
           f.k += e.k; f.c += 1;
+          var wy = e.w || 'yok'; r.why[wy] = (r.why[wy] || 0) + e.k;
         });
       });
       d.sport.forEach(function (e) {
@@ -861,6 +882,16 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
       return '<div class="hb"><span>' + m.t + '</span><div class="hbt"><div class="hbf" style="width:' + pc.toFixed(1) + '%"></div></div><span class="hv">' + fmt(v) + ' kcal · %' + Math.round(pc) + '</span></div>';
     }).join('') + '</div>';
 
+    var wt = 0, wh;
+    WHY.forEach(function (w) { wt += a.why[w[0]] || 0; });
+    if (wt > 0) {
+      wh = WHY.concat([['yok', 'Etiketsiz', 'var(--ink-2)']]).map(function (w) {
+        var v = a.why[w[0]] || 0, pc = a.eaten > 0 ? v / a.eaten * 100 : 0;
+        return '<div class="hb"><span>' + w[1] + '</span><div class="hbt"><div class="hbf" style="width:' + pc.toFixed(1) + '%;background:' + w[2] + '"></div></div><span class="hv">' + fmt(v) + ' kcal · %' + Math.round(pc) + '</span></div>';
+      }).join('') + '<p class="cap">Etiketli kalorinin %' + Math.round((a.why.acik || 0) / wt * 100) + '’i acıktığın için. Kalanı keyif, stres ve alışkanlık.</p>';
+    } else wh = '<p class="cap">Öğünlerin yanındaki “+ neden” düğmesiyle etiket ekle. Burada hangi nedenin kaç kalori getirdiğini görürsün.</p>';
+    h += '<div class="blk"><h3>Neden yedim?</h3>' + wh + '</div>';
+
     var worst = a.logged.reduce(function (b, x) { return x.net < b.net ? x : b; }, a.logged[0]);
     var most = a.logged.reduce(function (b, x) { return x.eaten > b.eaten ? x : b; }, a.logged[0]);
     var act = a.logged.reduce(function (b, x) { return x.burned > b.burned ? x : b; }, a.logged[0]);
@@ -937,6 +968,8 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
       hd += '<div><span>Harcamanın yenen kısmı</span><b>%' + Math.round(t.eaten / spend * 100) + '</b></div>';
       if (busy.v > 0) hd += '<div><span>En yoğun öğün</span><b>' + busy.t + ' · ' + fmt(busy.v) + ' kcal</b></div>';
     }
+    var dbx = debtFor(cur);
+    if (dbx.add > 0) hd += '<div><span>Borç payı</span><b>+' + fmt(dbx.add) + ' kcal</b></div>';
     $('#heroDet').innerHTML = hd;
 
     var el = $('#dayBody');
@@ -1042,6 +1075,24 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   }
   function bindNav() {
     document.addEventListener('click', function (e) {
+      var wb = e.target.closest('[data-why]');
+      if (wb) {
+        var fm = wb.closest('form'), on = wb.getAttribute('aria-pressed') === 'true';
+        Array.prototype.forEach.call(fm.querySelectorAll('[data-why]'), function (b) { b.setAttribute('aria-pressed', 'false'); });
+        if (on) fm.dataset.reason = ''; else { wb.setAttribute('aria-pressed', 'true'); fm.dataset.reason = wb.dataset.why; }
+        return;
+      }
+      var tb = e.target.closest('[data-tag]');
+      if (tb) {
+        var en = ensureDay(cur).meals[tb.dataset.tag][+tb.dataset.i];
+        if (en) {
+          var ix = -1;
+          WHY.forEach(function (w, j) { if (w[0] === en.w) ix = j; });
+          if (ix + 1 >= WHY.length) delete en.w; else en.w = WHY[ix + 1][0];
+          commit(cur); render();
+        }
+        return;
+      }
       var a = e.target.closest('[data-auth]');
       if (a) {
         if (a.dataset.auth === 'out') { $('#btnOut').click(); return; }
@@ -1062,11 +1113,45 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     setView('today');
   }
 
+  var WHY = [['acik', 'Acıktım', 'var(--good)'], ['keyif', 'Keyif', '#F59E0B'], ['stres', 'Stres', 'var(--bad)'], ['aliskanlik', 'Alışkanlık', '#6366F1']];
+  function whyName(k) { var n = k; WHY.forEach(function (w) { if (w[0] === k) n = w[1]; }); return n; }
+  function whyHtml() {
+    return '<span class="whylbl">Neden yedim? (isteğe bağlı)</span><div class="chips" role="group" aria-label="Neden yedim?">' +
+      WHY.map(function (w) { return '<button class="chip" type="button" data-why="' + w[0] + '" aria-pressed="false">' + w[1] + '</button>'; }).join('') + '</div>';
+  }
+  function walkMin(k) { return k / (5 * kg() / 60); }
+  function costTxt(k, pre) {
+    if (k < 5) return '';
+    return pre + '≈ ' + fmt(walkMin(k)) + ' dk hızlı yürüyüş · ' + fmt(k / (8.3 * kg() / 60)) + ' dk koşu';
+  }
+  function debtFor(key) {
+    var items = [], add = 0, i;
+    for (i = 1; i <= 3; i++) {
+      var k = addDays(key, -i), t = totals(k);
+      if (t.has && t.net < 0) { var per = -t.net / 3; add += per; items.push({ k: k, over: -t.net, per: per, left: 3 - i }); }
+    }
+    return { add: Math.round(add), items: items };
+  }
+  function renderDebt() {
+    var db = debtFor(cur), h;
+    if (!db.items.length) {
+      h = '<p class="cap">Aktif borcun yok. Bir gün bakım + sporunun üstünde yersen, fazla sonraki 3 güne eşit parçalarla ek açık olarak yayılır.</p>';
+    } else {
+      h = db.items.map(function (x) {
+        return '<div class="r"><span>' + fmtShort(x.k) + ' <span class="meta">· ' + fmt(x.over) + ' kcal fazla · ' + (x.left > 0 ? 'kalan ' + x.left + ' gün' : 'son gün') + '</span></span><span class="k b">+' + fmt(x.per) + ' / gün</span></div>';
+      }).join('');
+      h += target() > 0
+        ? '<p class="cap">Bu günün hedefi: ' + fmt(target()) + ' + ' + fmt(db.add) + ' borç = <b>' + fmt(target() + db.add) + ' kcal açık</b>.</p>'
+        : '<p class="cap">Bu güne düşen ek pay: +' + fmt(db.add) + ' kcal. Profilde hedef açık girersen hedefine eklenir.</p>';
+    }
+    $('#debtBody').innerHTML = h;
+  }
+
   function renderProfileText() {
     var m = maintenance();
     $('#maintTxt').textContent = 'Bakım kalorin: ' + fmt(m) + ' kcal / gün' + (num(state.profile.manual) > 0 ? ' (kendi girdiğin değer)' : ' (otomatik hesap)');
     $('#profBanner').hidden = !!state.profile.set;
-    renderExtras(); renderMore();
+    renderExtras(); renderMore(); renderDebt();
   }
 
   function render() {
@@ -1079,9 +1164,10 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     var custom = v === 'custom';
     $('[data-qtyrow]', form).hidden = custom;
     $('[data-custom]', form).hidden = !custom;
-    if (v === '' || custom) { pv.textContent = ''; return; }
+    if (custom) { var ck = num($('#ck-' + id).value); pv.textContent = ck > 0 ? costTxt(ck, '') : ''; return; }
+    if (v === '') { pv.textContent = ''; return; }
     var f = FOODS[+v], q = num($('#qty-' + id).value);
-    pv.textContent = q > 0 ? q.toLocaleString('tr-TR') + ' × ' + f[3] + ' kcal = ' + fmt(f[3] * q) + ' kcal' : '';
+    pv.textContent = q > 0 ? q.toLocaleString('tr-TR') + ' × ' + f[3] + ' kcal = ' + fmt(f[3] * q) + ' kcal' + costTxt(f[3] * q, ' · ') : '';
   }
 
   function sportPreview() {
@@ -1108,9 +1194,13 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
       if (!(q > 0)) { $('#qty-' + id).focus(); return; }
       entry = { n: f[1], u: f[2], q: q.toLocaleString('tr-TR'), k: Math.round(f[3] * q) };
     }
+    if (form.dataset.reason) entry.w = form.dataset.reason;
+    form.dataset.reason = '';
+    Array.prototype.forEach.call(form.querySelectorAll('[data-why]'), function (b) { b.setAttribute('aria-pressed', 'false'); });
     ensureDay(cur).meals[id].push(entry);
     commit(cur);
-    $('#sel-' + id).value = '';
+    $('#qs-' + id).value = '';
+    $('#sel-' + id).innerHTML = foodOptions('');
     $('#qty-' + id).value = '1';
     $('#cn-' + id).value = ''; $('#ck-' + id).value = '';
     mealPreview(form);
@@ -1319,7 +1409,16 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     $('#date').addEventListener('change', function (e) { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { setCur(e.target.value); } });
 
     $('#meals').addEventListener('submit', onMealSubmit);
-    $('#meals').addEventListener('input', function (e) { var f = e.target.closest('form'); if (f) mealPreview(f); });
+    $('#meals').addEventListener('input', function (e) {
+      var f = e.target.closest('form');
+      if (!f) return;
+      if (e.target.hasAttribute('data-search')) {
+        var sel = $('#sel-' + f.dataset.meal), q = e.target.value;
+        sel.innerHTML = foodOptions(q);
+        if (q.trim()) { var first = sel.querySelector('option[value]:not([value=""]):not([value="custom"])'); if (first) sel.value = first.value; }
+      }
+      mealPreview(f);
+    });
     $('#meals').addEventListener('change', function (e) { var f = e.target.closest('form'); if (f) mealPreview(f); });
 
     $('#sportForm').addEventListener('submit', onSportSubmit);
