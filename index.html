@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
-<body>
+<body data-view="today">
 <title>Kalori Defterim</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Plus+Jakarta+Sans:wght@400..700&display=swap">
@@ -196,22 +196,113 @@ details.card[open] > summary::after { content: '－'; }
 .r4.hd { border-top: 0; color: var(--ink-2); font-size: 12px; font-weight: 600; }
 .r4.mute { color: var(--ink-2); }
 .r4 .g, .r4 .b { font-weight: 600; }
+
+/* Okunaklılık iyileştirmeleri */
+body { font-size: 16px; line-height: 1.6; }
+.wrap { gap: 18px; }
+h2 { font-size: 20px; }
+.sub, .cap, .pv, .tl, .hero .note, .entries .meta, .hv, .r .meta { font-size: 14px; }
+.hero .lbl, .eq .l { font-size: 13px; }
+label { font-size: 13px; }
+.cap { line-height: 1.55; }
+.card { padding: 18px; gap: 14px; border-radius: 18px; box-shadow: 0 1px 2px rgba(20,26,46,.06); }
+.card > header { align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.card > header h2 { display: flex; align-items: center; gap: 10px; }
+.card > header h2::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--dot, var(--accent)); flex: none; }
+section[data-meal="sabah"] { --dot: #F59E0B; }
+section[data-meal="ogle"] { --dot: #10B981; }
+section[data-meal="aksam"] { --dot: #6366F1; }
+section[data-meal="ara"] { --dot: #EC4899; }
+#sportCard { --dot: #0EA5E9; }
+.tot { font-size: 17px; background: var(--surface-2); padding: 4px 12px; border-radius: 999px; }
+.entries li { padding: 12px 0; }
+.entries .nm { font-size: 16px; font-weight: 500; }
+.entries .meta { margin-top: 2px; font-weight: 400; }
+.entries .k { font-size: 16px; }
+.x { width: 44px; height: 44px; }
+.eq .v { font-size: 24px; }
+.hdet { display: grid; gap: 8px; border-top: 1px solid var(--hero-track); padding-top: 14px; font-size: 14px; color: var(--hero-dim); }
+.hdet:empty { display: none; }
+.hdet div { display: flex; justify-content: space-between; gap: 8px; }
+.hdet b { color: var(--hero-fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tiles { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.tv { font-size: 24px; }
+.tile { padding: 14px; }
+.segbtn { min-height: 44px; }
+.blk { gap: 10px; padding-top: 14px; }
+.blk.nb { border-top: 0; padding-top: 0; }
+.blk h3 { font-size: 17px; }
+.hb { grid-template-columns: 84px minmax(0, 1fr) auto; }
+.hbt { height: 12px; border-radius: 6px; }
+.hbf { border-radius: 6px; }
+.r { font-size: 15px; padding: 6px 0; }
+.r4 { font-size: 15px; padding: 8px 0; }
+.r4.hd { font-size: 13px; }
+details.card > summary { min-height: 44px; font-size: 20px; }
+#dayBody, #howBody, #sportBody, #guideBody { display: grid; gap: 14px; }
+
+/* Yeni tema + sol menü */
+:root{--bg:#F1F5F2;--surface:#FFFFFF;--surface-2:#E4EEE9;--ink:#10231C;--ink-2:#415A4F;--line:#D3E0D9;--accent:#0B7A66;--on-accent:#FFFFFF;--good:#0B8457;--bad:#C2410C;--hero-bg:#0B3D33;--hero-bg2:#0F6B58;--hero-fg:#EFFAF6;--hero-dim:#B4DACD;--hero-good:#6BF0BE;--hero-bad:#FFB38A;--hero-track:#2A7B69}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#09130F;--surface:#12201B;--surface-2:#1B2F27;--ink:#E6F2ED;--ink-2:#9FBBAF;--line:#263B31;--accent:#3DD6B0;--on-accent:#07130F;--good:#4FD1A0;--bad:#FF9A66;--hero-bg:#103A31;--hero-bg2:#17604F;--hero-fg:#EFFAF6;--hero-dim:#B4DACD;--hero-good:#6BF0BE;--hero-bad:#FFB38A;--hero-track:#2F7E6C;}}
+:root[data-theme="dark"]{--bg:#09130F;--surface:#12201B;--surface-2:#1B2F27;--ink:#E6F2ED;--ink-2:#9FBBAF;--line:#263B31;--accent:#3DD6B0;--on-accent:#07130F;--good:#4FD1A0;--bad:#FF9A66;--hero-bg:#103A31;--hero-bg2:#17604F;--hero-fg:#EFFAF6;--hero-dim:#B4DACD;--hero-good:#6BF0BE;--hero-bad:#FFB38A;--hero-track:#2F7E6C;}
+.hero{background:linear-gradient(145deg,var(--hero-bg),var(--hero-bg2));border-radius:24px;padding:24px;box-shadow:0 10px 28px rgba(11,61,51,.22)}
+.card{border:0;border-radius:20px;box-shadow:0 1px 3px rgba(16,35,28,.08),0 10px 28px rgba(16,35,28,.05)}
+h1{font-size:32px}
+.side{position:fixed;inset:0 auto 0 0;width:260px;z-index:30;background:var(--surface);border-right:1px solid var(--line);padding:max(20px,env(safe-area-inset-top,0px)) 14px 20px;display:flex;flex-direction:column;gap:6px;transform:translateX(-100%);visibility:hidden;transition:transform .25s ease,visibility .25s}
+.side.open{transform:none;visibility:visible}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--fd);font-weight:700;font-size:19px;padding:4px 8px 18px}
+.logo{width:38px;height:38px;border-radius:12px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:20px}
+.nav{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 14px;border:0;border-radius:12px;background:transparent;color:var(--ink-2);font-weight:600;font-size:16px;text-align:left;cursor:pointer}
+.nav:hover{background:var(--surface-2);color:var(--ink)}
+.nav[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+.nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sidefoot{margin-top:auto;background:var(--surface-2);border-radius:14px;padding:14px;display:grid;gap:2px}
+.sidefoot b{font-family:var(--fd);font-size:22px;font-variant-numeric:tabular-nums}
+.menuBtn{position:fixed;top:max(12px,env(safe-area-inset-top,0px));left:12px;z-index:25;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:none}
+.scrim.on{display:block}
+body{padding-top:72px}
+@media (min-width:900px){
+  .side{transform:none;visibility:visible}
+  .menuBtn,.scrim{display:none!important}
+  body{padding-left:calc(260px + 32px)!important;padding-top:28px}
+}
+@media (prefers-reduced-motion: reduce){.side{transition:none}}
+.hintb{width:100%;text-align:left;border:1px dashed var(--accent);background:var(--surface-2);color:var(--ink);cursor:pointer;min-height:44px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+body[data-view="today"] [data-view]:not([data-view~="today"]),
+body[data-view="sport"] [data-view]:not([data-view~="sport"]),
+body[data-view="analysis"] [data-view]:not([data-view~="analysis"]),
+body[data-view="profile"] [data-view]:not([data-view~="profile"]){display:none!important}
 </style>
+
+<button class="menuBtn" id="menuBtn" type="button" aria-label="Menüyü aç" aria-expanded="false" aria-controls="side">☰</button>
+<div class="scrim" id="scrim"></div>
+<nav class="side" id="side" aria-label="Ana menü">
+  <div class="brand"><span class="logo">K</span><span>Kalori Defterim</span></div>
+  <button class="nav" type="button" data-go="today"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Bugün</button>
+  <button class="nav" type="button" data-go="sport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Spor</button>
+  <button class="nav" type="button" data-go="analysis"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Analiz</button>
+  <button class="nav" type="button" data-go="profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profil ve hesap</button>
+  <div class="sidefoot"><span class="sub">Seçili günün neti</span><b id="sideNet">—</b></div>
+</nav>
 
 <div class="wrap">
   <header class="top">
-    <h1>Kalori Defterim</h1>
+    <h1 id="pageTitle">Bugün</h1>
     <p class="sub" id="subtitle">Ücretsiz · kayıt gerekmez · verilerin kendi cihazında kalır</p>
-    <div class="datebar">
+    <div class="datebar" data-view="today sport">
       <button class="btn icon" id="prev" type="button" aria-label="Önceki gün">‹</button>
       <input id="date" type="date" aria-label="Tarih">
       <button class="btn icon" id="next" type="button" aria-label="Sonraki gün">›</button>
       <button class="btn" id="today" type="button">Bugün</button>
     </div>
-    <div class="datetext" id="datetext"></div>
+    <div class="datetext" id="datetext" data-view="today sport"></div>
   </header>
 
-  <section class="card" id="acct" hidden>
+  <section class="card" id="acct" data-view="profile" hidden>
     <header><h2>Hesap</h2><span class="sub" id="acctSt"></span></header>
     <form class="adder" id="authForm" novalidate style="border-top:0;padding-top:0">
       <div class="grid2">
@@ -231,7 +322,9 @@ details.card[open] > summary::after { content: '－'; }
     </div>
   </section>
 
-  <section class="hero" aria-live="polite">
+  <button class="banner hintb" id="profHint" data-view="today" data-go="profile" type="button">Örnek değerler kullanılıyor. Kendi bilgilerini girmek için dokun →</button>
+
+  <section class="hero" data-view="today" aria-live="polite">
     <div class="lbl" id="heroLbl">Günlük kalori açığı</div>
     <div class="big" id="big">—</div>
     <div class="note" id="heroSub"></div>
@@ -240,20 +333,22 @@ details.card[open] > summary::after { content: '－'; }
       <div><span class="v" id="eqS">0</span><span class="l">+ Spor</span></div>
       <div><span class="v" id="eqE">0</span><span class="l">− Yenen</span></div>
     </div>
+    <div class="hdet" id="heroDet"></div>
     <div>
       <div class="track"><div class="fill" id="barFill"></div></div>
       <div class="note" id="barTxt" style="margin-top:6px"></div>
     </div>
   </section>
 
-  <div id="meals" style="display:grid;gap:16px"></div>
+  <div id="meals" data-view="today" style="display:grid;gap:16px"></div>
 
-  <section class="card" id="sportCard">
+  <section class="card" id="sportCard" data-view="sport">
     <header><h2>Spor</h2><span class="sub">Yaktığın kalori</span><span class="tot" id="sportTot">0 kcal</span></header>
     <ul class="entries" id="sportList"></ul>
     <form class="adder" id="sportForm" novalidate>
       <label class="sr" for="sportSel">Spor türü</label>
       <select id="sportSel" required></select>
+      <div class="chips" id="chips" role="group" aria-label="Hızlı süre seçimi"><button class="chip" type="button" data-min="15">15 dk</button><button class="chip" type="button" data-min="30">30 dk</button><button class="chip" type="button" data-min="45">45 dk</button><button class="chip" type="button" data-min="60">60 dk</button><button class="chip" type="button" data-min="90">90 dk</button></div>
       <div class="row">
         <label id="minWrap" for="sportMin">Süre (dakika)<input id="sportMin" type="number" inputmode="numeric" min="1" step="1" value="30"></label>
         <label id="skWrap" for="sportK" hidden>Yakılan kalori (kcal)<input id="sportK" type="number" inputmode="numeric" min="0" step="1"></label>
@@ -263,7 +358,22 @@ details.card[open] > summary::after { content: '－'; }
     </form>
   </section>
 
-  <section class="card" id="analysis">
+  <section class="card" id="sportDetail" data-view="sport">
+    <header><h2>Spor ayrıntısı</h2><span class="sub">Seçili gün ve hafta</span></header>
+    <div id="sportBody"></div>
+  </section>
+
+  <details class="card" id="sportGuide" data-view="sport">
+    <summary>Spor kalori tablosu</summary>
+    <div id="guideBody"></div>
+  </details>
+
+  <section class="card" id="dayDetail" data-view="today">
+    <header><h2>Günün ayrıntısı</h2><span class="sub">Seçili gün</span></header>
+    <div id="dayBody"></div>
+  </section>
+
+  <section class="card" id="analysis" data-view="analysis">
     <header><h2>Analiz</h2><span class="sub">Kayıt girdiğin günlere göre</span></header>
     <div class="seg" role="group" aria-label="Dönem">
       <button class="segbtn" type="button" data-per="week" aria-pressed="true">Haftalık</button>
@@ -280,7 +390,12 @@ details.card[open] > summary::after { content: '－'; }
     <div id="anDetail" style="display:grid;gap:12px"></div>
   </section>
 
-  <details class="card" id="profile">
+  <details class="card" id="how" data-view="profile">
+    <summary>Hesap nasıl yapılıyor?</summary>
+    <div id="howBody"></div>
+  </details>
+
+  <details class="card" id="profile" data-view="profile">
     <summary>Profilim</summary>
     <p class="banner" id="profBanner">Şu an örnek değerler kullanılıyor. Doğru hesap için kendi bilgilerini gir.</p>
     <div class="grid2">
@@ -297,7 +412,7 @@ details.card[open] > summary::after { content: '－'; }
     <p class="cap">Bakım kalorisi, hiç spor yapmadığın bir günde harcadığın tahmini kaloridir (Mifflin-St Jeor × 1,2). Spor kalorisi bunun üstüne eklenir. Tüm değerler tahminidir.</p>
   </details>
 
-  <div class="foot">
+  <div class="foot" data-view="today">
     <button class="btn ghost" id="sampleBtn" type="button">Örnek gün yükle</button>
     <button class="btn ghost" id="clearBtn" type="button" hidden>Bu günü temizle</button>
     <span class="cap" id="footNote">Kayıtlar bu tarayıcıda saklanır.</span>
@@ -615,7 +730,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   function renderSport() {
     var list = readDay(cur).sport;
     $('#sportList').innerHTML = list.length ? list.map(function (e, i) {
-      return '<li><div class="nm">' + esc(e.n) + (e.min ? '<div class="meta">' + esc(e.min) + ' dk</div>' : '') + '</div>' +
+      return '<li><div class="nm">' + esc(e.n) + (e.min ? '<div class="meta">' + esc(e.min) + ' dk · ' + f1(e.k / e.min) + ' kcal/dk' + (sportMet(e.n) ? ' · ' + lvl(sportMet(e.n)) + ' yoğunluk' : '') + '</div>' : '') + '</div>' +
         '<span class="k">' + fmt(e.k) + ' kcal</span>' +
         '<button class="x" type="button" data-del="sport" data-i="' + i + '" aria-label="' + esc(e.n) + ' sil">×</button></li>';
     }).join('') : '<li class="empty">Bugün spor eklenmedi.</li>';
@@ -734,6 +849,23 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
       return '<div class="hb"><span>' + m.t + '</span><div class="hbt"><div class="hbf" style="width:' + pc.toFixed(1) + '%"></div></div><span class="hv">' + fmt(v) + ' kcal · %' + Math.round(pc) + '</span></div>';
     }).join('') + '</div>';
 
+    var worst = a.logged.reduce(function (b, x) { return x.net < b.net ? x : b; }, a.logged[0]);
+    var most = a.logged.reduce(function (b, x) { return x.eaten > b.eaten ? x : b; }, a.logged[0]);
+    var act = a.logged.reduce(function (b, x) { return x.burned > b.burned ? x : b; }, a.logged[0]);
+    var hl = function (l, x, v, c) {
+      return '<div class="r"><span>' + l + ' <span class="meta">· ' + fmtShort(x.k) + '</span></span><span class="k ' + c + '">' + v + '</span></div>';
+    };
+    h += '<div class="blk"><h3>Öne çıkanlar</h3>' +
+      hl('En yüksek açık', best, signed(best.net) + ' kcal', best.net >= 0 ? 'g' : 'b') +
+      hl('En düşük açık', worst, signed(worst.net) + ' kcal', worst.net >= 0 ? 'g' : 'b') +
+      hl('En çok yenen gün', most, fmt(most.eaten) + ' kcal', '') +
+      (act.burned > 0 ? hl('En çok spor', act, fmt(act.burned) + ' kcal', '') : '') + '</div>';
+    if (tg > 0) {
+      var want = tg * n, ppc = Math.max(0, Math.min(100, a.net / want * 100));
+      h += '<div class="blk"><h3>Hedef ilerlemesi</h3><div class="hbt"><div class="hbf" style="width:' + ppc.toFixed(1) + '%;background:var(--good)"></div></div>' +
+        '<p class="cap">' + n + ' kayıtlı gün × ' + fmt(tg) + ' = ' + fmt(want) + ' kcal hedef. Gerçekleşen: ' + signed(a.net) + ' kcal (%' + Math.round(ppc) + ').</p></div>';
+    }
+
     var foods = Object.keys(a.foods).map(function (k) { return a.foods[k]; }).sort(function (x, y) { return y.k - x.k; }).slice(0, 5);
     if (foods.length) {
       h += '<div class="blk"><h3>En çok kalori getirenler</h3>' + foods.map(function (f) {
@@ -783,10 +915,138 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     clearArmed = false;
   }
 
+  function renderExtras() {
+    var t = totals(cur), d = readDay(cur), spend = t.maint + t.burned;
+    var ms = MEALS.map(function (m) { return { t: m.t, v: sum(d.meals[m.id]) }; });
+    var hd = '';
+    if (t.has && spend > 0) {
+      var busy = ms.reduce(function (b, x) { return x.v > b.v ? x : b; }, ms[0]);
+      hd += '<div><span>Toplam harcama</span><b>' + fmt(spend) + ' kcal</b></div>';
+      hd += '<div><span>Harcamanın yenen kısmı</span><b>%' + Math.round(t.eaten / spend * 100) + '</b></div>';
+      if (busy.v > 0) hd += '<div><span>En yoğun öğün</span><b>' + busy.t + ' · ' + fmt(busy.v) + ' kcal</b></div>';
+    }
+    $('#heroDet').innerHTML = hd;
+
+    var el = $('#dayBody');
+    if (!t.has) {
+      el.innerHTML = '<p class="cap">Yemek veya spor ekledikçe günün ayrıntısı burada görünür.</p>';
+    } else {
+      var top = Math.max(spend, t.eaten, 1);
+      var bar = function (l, v, c) {
+        return '<div class="hb"><span>' + l + '</span><div class="hbt"><div class="hbf" style="width:' + (v / top * 100).toFixed(1) + '%;background:' + c + '"></div></div><span class="hv">' + fmt(v) + ' kcal</span></div>';
+      };
+      var h = '<div class="blk nb"><h3>Harcanan ve yenen</h3>' + bar('Harcanan', spend, 'var(--good)') + bar('Yenen', t.eaten, 'var(--accent)') +
+        '<p class="cap">Harcanan = bakım ' + fmt(t.maint) + ' + spor ' + fmt(t.burned) + ' kcal.</p></div>';
+      h += '<div class="blk"><h3>Öğün dağılımı</h3>' + ms.map(function (x) {
+        var pc = t.eaten > 0 ? x.v / t.eaten * 100 : 0;
+        return '<div class="hb"><span>' + x.t + '</span><div class="hbt"><div class="hbf" style="width:' + pc.toFixed(1) + '%"></div></div><span class="hv">' + fmt(x.v) + ' kcal · %' + Math.round(pc) + '</span></div>';
+      }).join('') + '</div>';
+      var all = [];
+      MEALS.forEach(function (m) { d.meals[m.id].forEach(function (e) { all.push({ n: e.n, k: e.k, m: m.t }); }); });
+      all.sort(function (x, y) { return y.k - x.k; });
+      if (all.length) {
+        h += '<div class="blk"><h3>En çok kalori getirenler</h3>' + all.slice(0, 3).map(function (f) {
+          return '<div class="r"><span>' + esc(f.n) + ' <span class="meta">· ' + f.m + '</span></span><span class="k">' + fmt(f.k) + ' kcal</span></div>';
+        }).join('') + '<p class="cap">' + all.length + ' yemek kaydı' + (d.sport.length ? ', ' + d.sport.length + ' spor kaydı' : '') + '.</p></div>';
+      }
+      el.innerHTML = h;
+    }
+
+    var p = state.profile, b = bmr(), man = num(p.manual) > 0;
+    var row = function (l, v, m) {
+      return '<div class="r"><span>' + l + '<span class="meta" style="display:block">' + m + '</span></span><span class="k">' + v + '</span></div>';
+    };
+    $('#howBody').innerHTML = '<div class="blk nb">' +
+      row('1 · Bazal metabolizma', fmt(b) + ' kcal', 'Mifflin-St Jeor: 10 × kilo + 6,25 × boy − 5 × yaş ' + (p.sex === 'f' ? '− 161' : '+ 5')) +
+      row('2 · Bakım kalorisi', fmt(t.maint) + ' kcal', man ? 'Profilde kendi girdiğin değer kullanılıyor' : 'Bazal × 1,2 (hiç spor yapılmayan gün)') +
+      row('3 · Spor kalorisi', fmt(5 * kg() * 0.5) + ' kcal', 'MET × kilo × saat. Örnek: hızlı yürüyüş (5 MET), 30 dk, ' + fmt(kg()) + ' kg') +
+      row('4 · Günlük net', t.has ? signed(t.net) + ' kcal' : '—', 'Bakım + Spor − Yenen. Artıysa açık, eksiyse fazla') +
+      row('5 · Yağ eşdeğeri', '7.700 kcal ≈ 1 kg', 'Yaklaşık bir değerdir, gerçek kilo değişimi kişiden kişiye farklıdır') +
+      '</div>';
+  }
+
+  function sportMet(n) { var s = SPORTS.filter(function (x) { return x[0] === n; })[0]; return s ? s[1] : 0; }
+  function lvl(m) { return m < 3 ? 'hafif' : m < 6 ? 'orta' : 'yüksek'; }
+  function f1(n) { return n.toLocaleString('tr-TR', { maximumFractionDigits: 1 }); }
+
+  function renderMore() {
+    var t = totals(cur), d = readDay(cur), sn = $('#sideNet');
+    sn.textContent = t.has ? signed(t.net) + ' kcal' : '—';
+    sn.className = t.has ? (t.net >= 0 ? 'g' : 'b') : '';
+    $('#profHint').hidden = !!state.profile.set;
+
+    var min = 0, tk = 0;
+    d.sport.forEach(function (e) { if (e.min > 0) { min += e.min; tk += e.k; } });
+    var tiles = [
+      [min + ' dk', 'Bugünkü süre'],
+      [fmt(t.burned), 'Yakılan kcal'],
+      [min > 0 ? f1(tk / min) : '—', 'kcal / dakika'],
+      [t.maint > 0 ? '%' + Math.round(t.burned / t.maint * 100) : '—', 'Bakıma ek harcama']
+    ];
+    var s0 = addDays(cur, -((fromKey(cur).getDay() + 6) % 7)), wk = [], wmin = 0, wkc = 0, weq = 0, mx = 1, i;
+    for (i = 0; i < 7; i++) {
+      var k = addDays(s0, i), m = 0, kc = 0;
+      readDay(k).sport.forEach(function (e) {
+        var met = sportMet(e.n);
+        m += e.min || 0; kc += e.k;
+        if (met >= 6) weq += (e.min || 0) * 2; else if (met >= 3) weq += e.min || 0;
+      });
+      wk.push({ k: k, m: m, kc: kc }); wmin += m; wkc += kc; mx = Math.max(mx, m);
+    }
+    var pc = Math.min(100, weq / 150 * 100);
+    var h = '<div class="tiles">' + tiles.map(function (x) { return '<div class="tile"><span class="tv">' + x[0] + '</span><span class="tl">' + x[1] + '</span></div>'; }).join('') + '</div>';
+    h += '<div class="blk"><h3>Haftalık aktivite hedefi</h3><div class="hbt"><div class="hbf" style="width:' + pc.toFixed(1) + '%;background:var(--good)"></div></div>' +
+      '<p class="cap">Bu hafta ' + fmt(wmin) + ' dk spor, ' + fmt(wkc) + ' kcal. Orta tempo eşdeğeri: ' + fmt(weq) + ' / 150 dk. Dünya Sağlık Örgütü haftada en az 150 dk orta tempo (ya da 75 dk yüksek tempo) hareket önerir. Burada yüksek tempo dakikaları iki sayılır.</p></div>';
+    h += '<div class="blk"><h3>Bu hafta gün gün</h3>' + wk.map(function (x) {
+      var nm = fromKey(x.k).toLocaleDateString('tr-TR', { weekday: 'short', day: 'numeric' });
+      return '<div class="hb"><span>' + nm + '</span><div class="hbt"><div class="hbf" style="width:' + (x.m / mx * 100).toFixed(1) + '%;background:' + (x.k === cur ? 'var(--accent)' : 'var(--ink-2)') + '"></div></div><span class="hv">' + (x.kc ? x.m + ' dk · ' + fmt(x.kc) + ' kcal' : '—') + '</span></div>';
+    }).join('') + '</div>';
+    if (t.burned > 0) {
+      h += '<div class="blk"><h3>Bugün yaktığın kalori neye denk?</h3>' + [['Simit', 300], ['Muz', 105], ['Dilim baklava', 180], ['Dilim pizza', 270]].map(function (x) {
+        return '<div class="r"><span>' + x[0] + '</span><span class="k">≈ ' + f1(t.burned / x[1]) + ' adet</span></div>';
+      }).join('') + '</div>';
+    }
+    $('#sportBody').innerHTML = h;
+
+    var gl = SPORTS.slice().sort(function (a, b) { return b[1] - a[1]; });
+    $('#guideBody').innerHTML = '<p class="cap">' + fmt(kg()) + ' kg için tahmini değerler (kcal).</p><div class="r4 hd"><span>Spor</span><span>Yoğunluk</span><span>30 dk</span><span>60 dk</span></div>' +
+      gl.map(function (s) { return '<div class="r4"><span>' + esc(s[0]) + '</span><span>' + lvl(s[1]) + '</span><span>' + fmt(s[1] * kg() * 0.5) + '</span><span>' + fmt(s[1] * kg()) + '</span></div>'; }).join('');
+  }
+
+  var VIEWS = { today: 'Bugün', sport: 'Spor', analysis: 'Analiz', profile: 'Profil ve hesap' };
+  function toggleMenu(on) {
+    $('#side').classList.toggle('open', on);
+    $('#scrim').classList.toggle('on', on);
+    $('#menuBtn').setAttribute('aria-expanded', on ? 'true' : 'false');
+  }
+  function setView(v) {
+    document.body.setAttribute('data-view', v);
+    $('#pageTitle').textContent = VIEWS[v];
+    Array.prototype.forEach.call(document.querySelectorAll('.nav'), function (b) {
+      if (b.dataset.go === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    toggleMenu(false);
+    window.scrollTo(0, 0);
+  }
+  function bindNav() {
+    document.addEventListener('click', function (e) {
+      var g = e.target.closest('[data-go]');
+      if (g) { setView(g.dataset.go); return; }
+      var c = e.target.closest('[data-min]');
+      if (c) { $('#sportMin').value = c.dataset.min; sportPreview(); return; }
+      if (e.target.closest('[data-day]')) setView('today');
+    });
+    $('#menuBtn').addEventListener('click', function () { toggleMenu(!$('#side').classList.contains('open')); });
+    $('#scrim').addEventListener('click', function () { toggleMenu(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') toggleMenu(false); });
+    setView('today');
+  }
+
   function renderProfileText() {
     var m = maintenance();
     $('#maintTxt').textContent = 'Bakım kalorin: ' + fmt(m) + ' kcal / gün' + (num(state.profile.manual) > 0 ? ' (kendi girdiğin değer)' : ' (otomatik hesap)');
     $('#profBanner').hidden = !!state.profile.set;
+    renderExtras(); renderMore();
   }
 
   function render() {
@@ -808,9 +1068,10 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     var v = $('#sportSel').value, pv = $('#sportPv'), custom = v === 'custom';
     $('#minWrap').hidden = custom;
     $('#skWrap').hidden = !custom;
+    $('#chips').hidden = custom;
     if (v === '' || custom) { pv.textContent = custom ? '' : 'Süre ve kilona göre tahmini kalori hesaplanır.'; return; }
     var s = SPORTS[+v], min = num($('#sportMin').value);
-    pv.textContent = min > 0 ? '≈ ' + fmt(s[1] * kg() * min / 60) + ' kcal (' + fmt(kg()) + ' kg ile, ' + s[1] + ' MET)' : '';
+    pv.textContent = min > 0 ? '≈ ' + fmt(s[1] * kg() * min / 60) + ' kcal · ' + lvl(s[1]) + ' yoğunluk (' + s[1] + ' MET, ' + fmt(kg()) + ' kg ile)' : '';
   }
 
   function onMealSubmit(e) {
@@ -1095,6 +1356,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   buildMeals();
   buildSport();
   bind();
+  bindNav();
   sportPreview();
   render();
   cloudInit();
