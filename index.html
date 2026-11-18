@@ -269,6 +269,9 @@ body{padding-top:72px}
 }
 @media (prefers-reduced-motion: reduce){.side{transition:none}}
 .hintb{width:100%;text-align:left;border:1px dashed var(--accent);background:var(--surface-2);color:var(--ink);cursor:pointer;min-height:44px}
+.authbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border-radius:16px;padding:12px 14px;box-shadow:0 1px 3px rgba(16,35,28,.08)}
+.authbar .sub{flex:1 1 220px}
+.authbar .row{flex:0 0 auto}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer}
 .chip:hover{border-color:var(--accent)}
@@ -321,6 +324,15 @@ body[data-view="profile"] [data-view]:not([data-view~="profile"]){display:none!i
       <button class="btn ghost" type="button" id="btnOut">Çıkış yap</button>
     </div>
   </section>
+
+  <div class="authbar" id="authBar" data-view="today" hidden>
+    <span class="sub" id="authTxt">Kayıtlarını cihazlar arasında eşitlemek için hesap aç.</span>
+    <div class="row">
+      <button class="btn primary" id="authIn" type="button" data-auth="in">Giriş yap</button>
+      <button class="btn" id="authUp" type="button" data-auth="up">Üye ol</button>
+      <button class="btn ghost" id="authOutBtn" type="button" data-auth="out" hidden>Çıkış yap</button>
+    </div>
+  </div>
 
   <button class="banner hintb" id="profHint" data-view="today" data-go="profile" type="button">Örnek değerler kullanılıyor. Kendi bilgilerini girmek için dokun →</button>
 
@@ -1030,6 +1042,14 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   }
   function bindNav() {
     document.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-auth]');
+      if (a) {
+        if (a.dataset.auth === 'out') { $('#btnOut').click(); return; }
+        setView('profile');
+        authMsg(a.dataset.auth === 'up' ? 'Bir kullanıcı adı ve şifre yaz, sonra “Kayıt ol”a bas.' : 'Kullanıcı adı ve şifreni yaz, sonra “Giriş yap”a bas.');
+        $('#au-mail').focus();
+        return;
+      }
       var g = e.target.closest('[data-go]');
       if (g) { setView(g.dataset.go); return; }
       var c = e.target.closest('[data-min]');
@@ -1182,6 +1202,9 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     var u = cloud.user;
     $('#authForm').hidden = !!u;
     $('#authOut').hidden = !u;
+    $('#authBar').hidden = false;
+    $('#authIn').hidden = !!u; $('#authUp').hidden = !!u; $('#authOutBtn').hidden = !u;
+    $('#authTxt').textContent = u ? shownName(u.email) + ' olarak giriş yapıldı' : 'Kayıtlarını cihazlar arasında eşitlemek için hesap aç.';
     $('#footNote').textContent = u ? 'Kayıtlar hesabında da saklanır.' : 'Kayıtlar bu tarayıcıda saklanır.';
     setSt(u ? 'giriş yapıldı' : 'Giriş yapılmadı · kayıtlar sadece bu cihazda');
   }
