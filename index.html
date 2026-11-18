@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>:root{color-scheme:light}body{margin:0}</style>
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
 <title>Kalori Defterim</title>
@@ -215,13 +215,14 @@ details.card[open] > summary::after { content: '－'; }
     <header><h2>Hesap</h2><span class="sub" id="acctSt"></span></header>
     <form class="adder" id="authForm" novalidate style="border-top:0;padding-top:0">
       <div class="grid2">
-        <label for="au-mail">E-posta<input id="au-mail" type="email" autocomplete="email"></label>
+        <label for="au-mail">Kullanıcı adı<input id="au-mail" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20"></label>
         <label for="au-pass">Şifre (en az 6 karakter)<input id="au-pass" type="password" autocomplete="current-password"></label>
       </div>
       <div class="row">
         <button class="btn primary" type="submit">Giriş yap</button>
         <button class="btn" type="button" id="btnUp">Kayıt ol</button>
       </div>
+      <p class="cap">Kullanıcı adı: 3-20 karakter, harf, rakam, nokta, tire veya alt çizgi. Şifreni unutursan sıfırlanamaz, bir yere not al.</p>
       <p class="pv" id="authMsg"></p>
     </form>
     <div class="row" id="authOut" hidden>
@@ -885,15 +886,22 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
   var cloud = { sb: null, user: null };
   var profTimer = null;
 
+  var USER_DOMAIN = 'kalori.app';
+  function normUser(v) {
+    return String(v).trim().toLocaleLowerCase('tr-TR').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u');
+  }
+  function shownName(mail) { return String(mail || '').split('@')[0]; }
   function nowTxt() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
-  function setSt(msg) { $('#acctSt').textContent = (cloud.user ? cloud.user.email + ' · ' : '') + msg; }
+  function setSt(msg) { $('#acctSt').textContent = (cloud.user ? shownName(cloud.user.email) + ' · ' : '') + msg; }
   function authMsg(msg) { $('#authMsg').textContent = msg; }
   function trErr(m) {
     m = String(m || '');
     if (/invalid login/i.test(m)) return 'E-posta veya şifre hatalı.';
-    if (/already registered/i.test(m)) return 'Bu e-posta zaten kayıtlı, giriş yap.';
-    if (/not confirmed/i.test(m)) return 'E-postanı onaylaman gerekiyor. Gelen kutundaki bağlantıya tıkla.';
+    if (/already registered/i.test(m)) return 'Bu kullanıcı adı alınmış. Giriş yap ya da başka bir ad dene.';
+    if (/not confirmed/i.test(m)) return 'Bu hesap e-posta onayı bekliyor. Supabase ayarında Confirm email kapalı olmalı. Hesabı Users listesinden silip yeniden kayıt ol.';
     if (/password/i.test(m) && /6/.test(m)) return 'Şifre en az 6 karakter olmalı.';
+    if (/rate limit/i.test(m)) return 'Supabase e-posta limiti doldu. Ayarlarda Confirm email kapalı olmalı, biraz bekleyip tekrar dene.';
+    if (/email/i.test(m) && /invalid/i.test(m)) return 'Bu kullanıcı adı kabul edilmedi, başka bir ad dene.';
     return m || 'Bir hata oluştu.';
   }
 
@@ -986,8 +994,10 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
 
   function doAuth(mode) {
     if (!cloud.sb) { authMsg('Bulut bağlantısı hazır değil, birkaç saniye sonra tekrar dene.'); return; }
-    var mail = $('#au-mail').value.trim(), pass = $('#au-pass').value;
-    if (!mail || pass.length < 6) { authMsg('E-posta ve en az 6 karakterlik şifre gir.'); return; }
+    var uname = normUser($('#au-mail').value), pass = $('#au-pass').value;
+    if (!/^[a-z0-9._-]{3,20}$/.test(uname)) { authMsg('Kullanıcı adı 3-20 karakter olmalı. Harf, rakam, nokta, tire veya alt çizgi kullan.'); return; }
+    if (pass.length < 6) { authMsg('Şifre en az 6 karakter olmalı.'); return; }
+    var mail = uname + '@' + USER_DOMAIN;
     authMsg('Bekleniyor…');
     var q = mode === 'in'
       ? cloud.sb.auth.signInWithPassword({ email: mail, password: pass })
@@ -995,7 +1005,7 @@ window.KALORI_CLOUD = { url: 'https://xuyrdgtcpxeaadymqfem.supabase.co', key: 's
     q.then(function (r) {
       if (r.error) { authMsg(trErr(r.error.message)); return; }
       if (r.data && r.data.session) { authMsg(''); $('#au-pass').value = ''; setUser(r.data.session.user); return; }
-      authMsg('Kayıt alındı. E-postana gelen onay bağlantısına tıkla, sonra giriş yap.');
+      authMsg('Kayıt alındı ama Supabase hâlâ e-posta onayı istiyor. Ayarlarda Confirm email seçeneğini kapat, hesabı Users listesinden sil ve yeniden kayıt ol.');
     }).catch(function (e) { authMsg(trErr(e && e.message)); });
   }
 
